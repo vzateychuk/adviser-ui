@@ -49,8 +49,8 @@ export function DocumentList({ documents, isLoading }: DocumentListProps) {
                   <p className="mt-1 text-sm text-slate-600">
                     {doc.category} · дата записи {formatDate(doc.document_date)}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-slate-400" title={doc.id}>
-                    id: {doc.id.slice(0, 8)}…
+                  <p className="mt-0.5 break-all font-mono text-xs text-slate-400" title={doc.id}>
+                    id: {doc.id}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
@@ -69,11 +69,28 @@ export function DocumentList({ documents, isLoading }: DocumentListProps) {
 }
 
 function documentDisplayName(doc: DocumentDTO): string {
-  const path = doc.source_path
-  if (!path || path.includes('filestore') || path.includes('\\') || path.startsWith('/')) {
-    return doc.id
+  const basename = basenameFromPath(doc.source_path)
+  if (basename && !isLegacyFilestoreName(basename, doc.id)) {
+    return basename
   }
-  return path
+  if (basename && isLegacyFilestoreName(basename, doc.id)) {
+    return doc.category || 'Документ'
+  }
+  return doc.id
+}
+
+/** Extract filename from upload path or Windows filestore path. */
+function basenameFromPath(path: string | undefined): string | null {
+  const trimmed = path?.trim()
+  if (!trimmed) return null
+  const segments = trimmed.replace(/\\/g, '/').split('/')
+  return segments[segments.length - 1] || null
+}
+
+/** Legacy rows stored as .data/filestore/{document_id}.md — not the original upload name. */
+function isLegacyFilestoreName(basename: string, documentId: string): boolean {
+  const stem = basename.replace(/\.md$/i, '')
+  return stem.toLowerCase() === documentId.toLowerCase()
 }
 
 function StatusBadge({ indexedAt }: { indexedAt: string }) {
