@@ -18,8 +18,8 @@ export function DocumentsPage() {
       </header>
 
       <DocumentUpload
-        onSuccess={() => {
-          showToast('Документ успешно добавлен', 'success')
+        onSuccess={(doc) => {
+          showToast(`Документ «${doc.source_path}» добавлен`, 'success')
           void refetch()
         }}
         onError={(message) => showToast(message, 'error')}

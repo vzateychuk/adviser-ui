@@ -7,6 +7,8 @@
 
 export interface DocumentDetailDTO {
   id: string;
+  /** Исходное имя файла при загрузке */
+  source_path: string;
   category: string;
   document_date: string;
   indexed_at: string;

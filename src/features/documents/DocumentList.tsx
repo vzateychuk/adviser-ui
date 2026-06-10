@@ -35,24 +35,45 @@ export function DocumentList({ documents, isLoading }: DocumentListProps) {
         </p>
       ) : (
         <ul className="mt-4 divide-y divide-slate-100">
-          {documents.map((doc) => (
-            <li key={doc.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-900">{doc.id}</p>
-                <p className="mt-1 text-sm text-slate-600">
-                  {doc.category} · дата записи {formatDate(doc.document_date)}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-3">
-                <StatusBadge indexedAt={doc.indexed_at} />
-                <span className="text-xs text-slate-400">добавлен {formatDateTime(doc.indexed_at)}</span>
-              </div>
-            </li>
-          ))}
+          {documents.map((doc) => {
+            const displayName = documentDisplayName(doc)
+            return (
+              <li
+                key={doc.id}
+                className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-slate-900" title={displayName}>
+                    {displayName}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {doc.category} · дата записи {formatDate(doc.document_date)}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-slate-400" title={doc.id}>
+                    id: {doc.id.slice(0, 8)}…
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  <StatusBadge indexedAt={doc.indexed_at} />
+                  <span className="text-xs text-slate-400">
+                    добавлен {formatDateTime(doc.indexed_at)}
+                  </span>
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
     </section>
   )
+}
+
+function documentDisplayName(doc: DocumentDTO): string {
+  const path = doc.source_path
+  if (!path || path.includes('filestore') || path.includes('\\') || path.startsWith('/')) {
+    return doc.id
+  }
+  return path
 }
 
 function StatusBadge({ indexedAt }: { indexedAt: string }) {

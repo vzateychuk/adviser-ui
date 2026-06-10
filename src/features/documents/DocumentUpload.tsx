@@ -1,9 +1,10 @@
+import type { DocumentDTO } from '../../core/api/generated/models'
 import { useRef, useState } from 'react'
 import { useUploadDocument } from './useUploadDocument'
 import { userFacingError } from '../../shared/utils/userFacingError'
 
 type DocumentUploadProps = {
-  onSuccess: () => void
+  onSuccess: (doc: DocumentDTO) => void
   onError: (message: string) => void
 }
 
@@ -19,8 +20,8 @@ export function DocumentUpload({ onSuccess, onError }: DocumentUploadProps) {
     }
 
     try {
-      await upload.mutateAsync(file)
-      onSuccess()
+      const doc = await upload.mutateAsync(file)
+      onSuccess(doc)
     } catch (error) {
       onError(userFacingError(error))
     }
